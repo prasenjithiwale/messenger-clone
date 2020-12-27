@@ -2,12 +2,23 @@ import { useState, useEffect} from 'react';
 import { Button, FormControl, Input, InputLabel } from '@material-ui/core';
 import './App.css';
 import Message from './Message';
+import db from './firebase'
+import firebase from 'firebase'
 
 function App() {
+  const [messages, setMessages] = useState([{username:'Prasenjit',message:'Hola Personas!'}]);
 
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([{username:'Prasenjit',txt:'Hola Personas!'}]);
   const [username, setUsername] = useState('');
+
+
+  useEffect(() => {
+    db.collection('messages')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(snapshot =>{
+      setMessages(snapshot.docs.map(doc => doc.data()))
+    });
+  },[]);
 
   useEffect(() =>{
     setUsername(prompt('Please enter your username'));
@@ -17,7 +28,13 @@ function App() {
 
   const sendMessage = (event) => {
     event.preventDefault();
-    setMessages([...messages, {username:username, txt: input}]);
+
+    db.collection('messages').add({
+      message: input,
+      username: username,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    //setMessages([...messages, {username:username, message: input}]);
     setInput('');
   }
 
@@ -30,12 +47,12 @@ function App() {
     <FormControl>
       <InputLabel>Enter A Message</InputLabel>
       <Input value = {input} onChange={ event => setInput(event.target.value)} />
-      <Button type='submit' disabled={!input} variant='contained' color='primary' onClick={sendMessage}>Send Message</Button>
+      <Button type="submit" disabled={!input} variant='contained' color='primary' onClick={sendMessage}>Send Message</Button>
     </FormControl>
 
     {
       messages.map(message =>(
-        <Message text={message}/>
+        <Message text={message} usr={username}/>
       ))
     }
     </div>
