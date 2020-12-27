@@ -6,8 +6,16 @@
 .pnp.js
 
 # Database Files
-
+/.firebase
 /src/firebase.js
+/build
+
+#files
+
+firebase.json
+firebase.indexes.json*
+firebase.rules*
+.firebaserc
 
 # testing
 /coverage
